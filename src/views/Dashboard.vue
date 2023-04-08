@@ -6,11 +6,14 @@
 <template>
   <div>
     <!-- Counter Widgets -->
-	<a-row>
-		<h3 style="margin-bottom: 5px">Hai {{user.name}},</h3>
-		<h5>Semangat ya kerja di {{cabang.name}} hari ini !</h5>
-		<br>
-	</a-row>
+    <a-row>
+      <a-card>
+        <h4 style="margin-bottom: 5px">Hai {{ user.name }},</h4>
+        <h6>Semangat ya kerja di {{ cabang.name }} hari ini !</h6>
+        <a-button type="default" @click="changeCabang()">Ganti Cabang</a-button>
+      </a-card>
+      <br />
+    </a-row>
     <a-row :gutter="24">
       <a-col
         :span="24"
@@ -256,10 +259,15 @@ export default {
     };
   },
   mounted() {
-	this.cabang = JSON.parse(localStorage.getItem('cabang'))
-	this.user = JSON.parse(localStorage.getItem("user"));
+    this.cabang = JSON.parse(localStorage.getItem("cabang"));
+    this.user = JSON.parse(localStorage.getItem("user"));
 
-	console.error('cabang', this.cabang)
+    console.error("cabang", this.cabang);
+  },
+  methods: {
+    changeCabang(){
+      this.$router.push('/select-cabang')
+    }
   },
 };
 </script>
