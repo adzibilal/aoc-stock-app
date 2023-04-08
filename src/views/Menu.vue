@@ -10,7 +10,7 @@
       <a-input-search
         :span="24"
         @search="onSearch"
-        placeholder="Cari Barang"
+        placeholder="Cari Menu"
         style="margin: 15px"
       ></a-input-search>
       <!-- Authors Table Column -->
@@ -23,45 +23,22 @@
           <template #title>
             <a-row type="flex" align="middle">
               <a-col :span="12" :md="16">
-                <h5 class="font-semibold m-0">Data Inventory</h5>
+                <h5 class="font-semibold m-0">Data Resep Menu</h5>
               </a-col>
               <a-col :span="12" :md="6">
                 <!-- <a-radio-group v-model="authorsHeaderBtns" size="small">
                   <a-radio-button value="all">ALL</a-radio-button>
                   <a-radio-button value="online">ONLINE</a-radio-button>
                 </a-radio-group> -->
-                <a-button type="primary" @click="showModal">
-                  Tambah Barang
+                <a-button type="primary" @click="addMenu">
+                  Tambah Menu
                 </a-button>
-                <a-modal
-                  v-model="visible"
-                  title="Tambah Barang"
-                  okText="Simpan"
-                  cancelText="Batal"
-                  @ok="handleOk"
-                >
-                  <a-input placeholder="Nama Barang" v-model="name" />
-                  <br /><br />
-                  <a-input
-                    placeholder="Jumlah"
-                    v-model="quantity"
-                  /><br /><br />
-                  <a-select
-                    default-value="ml"
-                    v-model="unit"
-                    style="width: 100%"
-                  >
-                    <a-select-option value="ml"> ml </a-select-option>
-                    <a-select-option value="gr"> gr </a-select-option>
-                    <a-select-option value="pcs"> pcs </a-select-option>
-                  </a-select>
-                </a-modal>
               </a-col>
             </a-row>
           </template>
           <a-table
             :columns="table1Columns"
-            :data-source="inventory"
+            :data-source="menu"
             :pagination="true"
           >
             <template slot="editBtn" slot-scope="row">
@@ -113,16 +90,6 @@ const table1Columns = [
     scopedSlots: { customRender: "name" },
   },
   {
-    title: "Jumlah",
-    dataIndex: "quantity",
-    scopedSlots: { customRender: "quantity" },
-  },
-  {
-    title: "Unit",
-    dataIndex: "unit",
-    scopedSlots: { customRender: "unit" },
-  },
-  {
     title: "",
     scopedSlots: { customRender: "editBtn" },
     width: 200,
@@ -138,9 +105,10 @@ export default {
   },
   data() {
     return {
+
       // Associating "Authors" table columns with its corresponding property.
       table1Columns: table1Columns,
-      inventory: null,
+      menu: null,
       cabang: null,
       visible: false,
       name: "",
@@ -150,34 +118,38 @@ export default {
     };
   },
   async mounted() {
-    this.getInventory();
+    this.getMenu();
   },
   methods: {
+
+    addMenu(){
+      this.$router.push(`/menu/add`);
+    },
     onSearch(value) {
       console.error(value);
       if (value) {
-        this.inventory = this.inventory.filter((item) =>
+        this.menu = this.menu.filter((item) =>
           item.name.toLowerCase().includes(value.toLowerCase())
         );
-        console.error("filtered", this.inventory);
+        console.error("filtered", this.menu);
       } else {
-        this.getInventory();
+        this.getMenu();
       }
     },
 
-    async getInventory() {
+    async getMenu() {
       this.cabang = JSON.parse(localStorage.getItem("cabang"));
 
       const { data, error } = await supabase
-        .from("ingredient")
+        .from("menu")
         .select("*")
         .eq("id_cabang", this.cabang.id);
 
       if (error) {
         console.log("Error get Ingridient", error);
       } else if (data && data.length > 0) {
-        this.inventory = data; // assuming only one employee is returned
-        console.error("inventory", this.inventory);
+        this.menu = data; // assuming only one employee is returned
+        console.error("inventory", this.menu);
       } else {
         console.log("No matching cabang found");
       }
@@ -214,7 +186,7 @@ export default {
           ),
         });
       }
-      this.getInventory();
+      this.getMenu();
       this.visible = false;
     },
 
@@ -223,11 +195,7 @@ export default {
     },
     async handleDelete(id) {
       if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-        const { error } = await supabase
-          .from("ingredient")
-          .delete()
-          .eq("id", id);
-
+        const { error } = await supabase.from("menu").delete().eq("id", id);
         if (error) {
           console.error("err delete barang", error);
         } else {
@@ -241,7 +209,7 @@ export default {
               </div>
             ),
           });
-          this.getInventory();
+          this.getMenu();
         }
       }
     },

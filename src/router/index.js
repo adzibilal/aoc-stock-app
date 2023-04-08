@@ -53,6 +53,19 @@ let routes = [
     name: "Select Cabang",
     component: () => import("../views/SelectCabang.vue"),
   },
+
+  {
+    path: "/menu",
+    name: "Resep Menu",
+    layout: "dashboard",
+    component: () => import("../views/Menu.vue"),
+  },
+  {
+    path: "/menu/add",
+    name: "Tambah Menu",
+    layout: "dashboard",
+    component: () => import("../views/MenuAdd.vue"),
+  },
   {
     path: "/billing",
     name: "Billing",
