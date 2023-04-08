@@ -40,9 +40,17 @@
                   cancelText="Batal"
                   @ok="handleOk"
                 >
-                  <a-input placeholder="Nama Barang" /> <br><br>
-                  <a-input placeholder="Jumlah" /><br><br>
-                  <a-select default-value="ml" style="width: 100%;">
+                  <a-input placeholder="Nama Barang" v-model="name" />
+                  <br /><br />
+                  <a-input
+                    placeholder="Jumlah"
+                    v-model="quantity"
+                  /><br /><br />
+                  <a-select
+                    default-value="ml"
+                    v-model="unit"
+                    style="width: 100%"
+                  >
                     <a-select-option value="ml"> ml </a-select-option>
                     <a-select-option value="gr"> gr </a-select-option>
                     <a-select-option value="pcs"> pcs </a-select-option>
@@ -56,41 +64,37 @@
             :data-source="inventory"
             :pagination="true"
           >
-            <template slot="author" slot-scope="author">
-              <div class="table-avatar-info">
-                <a-avatar shape="square" :src="author.avatar" />
-                <div class="avatar-info">
-                  <h6>{{ author.name }}</h6>
-                  <p>{{ author.email }}</p>
-                </div>
-              </div>
-            </template>
-
-            <template slot="func" slot-scope="func">
-              <div class="author-info">
-                <h6 class="m-0">{{ func.job }}</h6>
-                <p class="m-0 font-regular text-muted">{{ func.department }}</p>
-              </div>
-            </template>
-
-            <template slot="status" slot-scope="status">
-              <a-tag
-                class="tag-status"
-                :class="status ? 'ant-tag-primary' : 'ant-tag-muted'"
-              >
-                {{ status ? "ONLINE" : "OFFLINE" }}
-              </a-tag>
-            </template>
-
             <template slot="editBtn" slot-scope="row">
-              <a-button
-                type="link"
-                :data-id="row.id"
-                class="btn-edit"
-                @click="editItem(row.id)"
-              >
-                Edit
-              </a-button>
+              <a-row>
+                <a-col :span="12">
+                  <a-button
+                    type="default"
+                    :data-id="row.id"
+                    class="btn-edit"
+                    @click="editItem(row.id)"
+                  >
+                    Edit
+                  </a-button>
+                </a-col>
+                <a-col :span="12">
+                  <a-button
+                    type="danger"
+                    :data-id="row.id"
+                    @click="deleteItem()"
+                  >
+                    Hapus
+                  </a-button>
+                  <a-modal
+                    v-model="confDelete"
+                    title="Hapus Item Ini?"
+                    okText="Hapus"
+                    cancleText="Batal"
+                    @ok="handleDelete(row.id)"
+                  >
+                    <p>Anda yakin ingin menghapus {{ row.name }} ?</p>
+                  </a-modal>
+                </a-col>
+              </a-row>
             </template>
           </a-table>
         </a-card>
@@ -130,7 +134,7 @@ const table1Columns = [
   {
     title: "",
     scopedSlots: { customRender: "editBtn" },
-    width: 50,
+    width: 200,
   },
 ];
 
@@ -317,7 +321,7 @@ const table2Data = [
   },
 ];
 import { supabase } from "../lib/supabaseClient";
-
+import { Modal } from "ant-design-vue";
 export default {
   components: {
     CardAuthorTable,
@@ -339,6 +343,10 @@ export default {
       inventory: null,
       cabang: null,
       visible: false,
+      name: "",
+      quantity: "",
+      unit: "",
+      confDelete: false,
     };
   },
   async mounted() {
@@ -377,14 +385,60 @@ export default {
 
     editItem(id) {
       console.error("id", id);
+      this.$router.push(`/inventory/edit/${id}`);
     },
 
     showModal() {
       this.visible = true;
     },
-    handleOk(e) {
+    async handleOk(e) {
       console.log(e);
+      console.error("data", this.name, this.quantity, this.unit);
+      const { error } = await supabase.from("ingredient").insert({
+        name: this.name,
+        quantity: this.quantity,
+        unit: this.unit,
+        id_cabang: this.cabang.id,
+      });
+
+      if (error) {
+        console.error("err add barang", error);
+      } else {
+        this.$success({
+          title: "Berhasil Menambah",
+          // JSX support
+          content: (
+            <div>
+              <p>Berhasil Menambah</p>
+            </div>
+          ),
+        });
+      }
+      this.getInventory();
       this.visible = false;
+    },
+
+    deleteItem() {
+      this.confDelete = true;
+    },
+    async handleDelete(id) {
+      const { error } = await supabase.from("ingredient").delete().eq("id", id);
+
+      if (error) {
+        console.error("err delete barang", error);
+      } else {
+        this.confDelete = false;
+        this.$success({
+          title: "Berhasil Menghapus",
+          // JSX support
+          content: (
+            <div>
+              <p>Berhasil Menghapus</p>
+            </div>
+          ),
+        });
+        this.getInventory();
+      }
     },
   },
 };

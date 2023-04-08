@@ -43,6 +43,12 @@ let routes = [
     component: () => import("../views/Inventory.vue"),
   },
   {
+    path: "/inventory/edit/:id",
+    name: "edit-inventory",
+    layout: "dashboard",
+    component: () => import("../views/InventoryEdit.vue"),
+  },
+  {
     path: "/select-cabang",
     name: "Select Cabang",
     component: () => import("../views/SelectCabang.vue"),

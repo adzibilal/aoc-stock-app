@@ -182,3 +182,9 @@
 	})
 
 </script>
+
+<style>
+.router-link-active{
+	color: #1b1b1b !important;
+}
+</style>
