@@ -44,7 +44,7 @@ let routes = [
   },
   {
     path: "/inventory/edit/:id",
-    name: "edit-inventory",
+    name: "Edit Barang",
     layout: "dashboard",
     component: () => import("../views/InventoryEdit.vue"),
   },
@@ -65,6 +65,12 @@ let routes = [
     name: "Tambah Menu",
     layout: "dashboard",
     component: () => import("../views/MenuAdd.vue"),
+  },
+  {
+    path: "/menu/edit/:id",
+    name: "Edit Menu",
+    layout: "dashboard",
+    component: () => import("../views/MenuEdit.vue"),
   },
   {
     path: "/billing",

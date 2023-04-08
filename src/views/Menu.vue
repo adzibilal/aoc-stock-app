@@ -22,10 +22,10 @@
         >
           <template #title>
             <a-row type="flex" align="middle">
-              <a-col :span="12" :md="16">
+              <a-col :span="14" :md="16">
                 <h5 class="font-semibold m-0">Data Resep Menu</h5>
               </a-col>
-              <a-col :span="12" :md="6">
+              <a-col :span="6" :md="6">
                 <!-- <a-radio-group v-model="authorsHeaderBtns" size="small">
                   <a-radio-button value="all">ALL</a-radio-button>
                   <a-radio-button value="online">ONLINE</a-radio-button>
@@ -157,7 +157,7 @@ export default {
 
     editItem(id) {
       console.error("id", id);
-      this.$router.push(`/inventory/edit/${id}`);
+      this.$router.push(`/menu/edit/${id}`);
     },
 
     showModal() {

@@ -9,7 +9,7 @@
     <a-row>
       <a-card>
         <h4 style="margin-bottom: 5px">Hai {{ user.name }},</h4>
-        <h6>Semangat ya kerja di {{ cabang.name }} hari ini !</h6>
+        <p>Semangat ya kerja di {{ cabang.name }} hari ini !</p>
         <a-button type="default" @click="changeCabang()">Ganti Cabang</a-button>
       </a-card>
       <br />
