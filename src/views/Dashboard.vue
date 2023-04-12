@@ -11,6 +11,7 @@
         <h4 style="margin-bottom: 5px">Hai {{ user.name }},</h4>
         <p>Semangat ya kerja di {{ cabang.name }} hari ini !</p>
         <a-button type="default" @click="changeCabang()">Ganti Cabang</a-button>
+        <a-button type="default" @click="copyOpenShift()">Open Shift</a-button>
       </a-card>
       <br />
     </a-row>
@@ -234,6 +235,9 @@ const tableData = [
   },
 ];
 
+import { supabase } from "../lib/supabaseClient";
+import { Modal } from "ant-design-vue";
+
 export default {
   components: {
     CardBarChart,
@@ -256,18 +260,80 @@ export default {
       stats,
       cabang: null,
       user: null,
+      inventory: null,
     };
   },
   mounted() {
     this.cabang = JSON.parse(localStorage.getItem("cabang"));
     this.user = JSON.parse(localStorage.getItem("user"));
-
+    this.getInventory();
     console.error("cabang", this.cabang);
   },
   methods: {
-    changeCabang(){
-      this.$router.push('/select-cabang')
-    }
+    changeCabang() {
+      this.$router.push("/select-cabang");
+    },
+    async getInventory() {
+      this.isLoading = true;
+      this.cabang = JSON.parse(localStorage.getItem("cabang"));
+
+      const { data, error } = await supabase
+        .from("ingredient")
+        .select("*")
+        .eq("id_cabang", this.cabang.id);
+
+      if (error) {
+        console.log("Error get Ingridient", error);
+      } else if (data && data.length > 0) {
+        this.inventory = data.reduce((acc, curr) => {
+          if (!acc[curr.category]) {
+            acc[curr.category] = [];
+          }
+          acc[curr.category].push(curr);
+          return acc;
+        }, {});
+
+        console.error("inventory", this.inventory);
+        this.isLoading = false;
+      } else {
+        console.log("No matching cabang found");
+      }
+    },
+    copyOpenShift() {
+      // get current date
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, "0");
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const year = today.getFullYear();
+
+      // teks report dummy
+      let report = `Bismillah\nOpen\n\nStock tanggal ${day}/${month}/${year}\n\n`;
+
+      for (const key in this.inventory) {
+        let category = key.charAt(0).toUpperCase() + key.slice(1);
+        if (category === "Null") {
+          category = "Tidak Terkategori";
+        }
+        report += `${category}\n`;
+        this.inventory[key].forEach((item) => {
+          report += `- ${item.name} : ${item.quantity}\n`;
+        });
+        report += "\n";
+      }
+
+      navigator.clipboard.writeText(report).then(() => {
+        console.error("Laporan berhasil disalin");
+        this.$success({
+          title: "Berhasil disalin",
+          // JSX support
+          content: (
+            <div>
+              <p>Report Open Shift berhasil di salin</p>
+            </div>
+          ),
+        });
+      });
+    },
   },
 };
 </script>
