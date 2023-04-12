@@ -146,10 +146,12 @@ export default {
     },
     onSearch(value) {},
     logout() {
-      console.error(this.user);
-      localStorage.clear();
-      console.error(this.user);
-      this.$router.push("/sign-in");
+      if (confirm("Apakah Anda yakin ingin Keluar?")) {
+        console.error(this.user);
+        localStorage.clear();
+        console.error(this.user);
+        this.$router.push("/sign-in");
+      } 
     },
   },
   mounted: function () {

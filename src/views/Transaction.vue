@@ -23,7 +23,7 @@
           <template #title>
             <a-row type="flex" align="middle">
               <a-col :span="14" :md="16">
-                <h5 class="font-semibold m-0">Data Resep Menu</h5>
+                <h5 class="font-semibold m-0">Data transaction</h5>
               </a-col>
               <a-col :span="6" :md="6">
                 <!-- <a-radio-group v-model="authorsHeaderBtns" size="small">
@@ -31,22 +31,21 @@
                   <a-radio-button value="online">ONLINE</a-radio-button>
                 </a-radio-group> -->
                 <a-button type="primary" @click="addMenu">
-                  Tambah Menu
+                  Tambah Transaksi
                 </a-button>
               </a-col>
             </a-row>
           </template>
           <a-table
             :columns="table1Columns"
-            :data-source="menu"
+            :data-source="transaction"
             :pagination="true"
           >
-            <template slot="menu_ingredient" slot-scope="row">
-              <a-row>
-                <a-col :span="12">
-                  <p v-for="(item, index) in row" :key="index">{{item.ingredient.name}} - ({{item.quantity}}{{item.ingredient.unit}})</p>
-                </a-col>
-              </a-row>
+            <template slot="date" slot-scope="row">
+              <p>{{ formatDate(row) }}</p>
+            </template>
+            <template slot="detail" slot-scope="row">
+              <p v-for="(item, index) in row" :key="index">{{ item.menu.name }} - {{ item.quantity }}</p>
             </template>
             <template slot="editBtn" slot-scope="row">
               <a-row>
@@ -92,15 +91,14 @@ import CardProjectTable2 from "../components/Cards/CardProjectTable2";
 // "Authors" table list of columns and their properties.
 const table1Columns = [
   {
-    title: "Nama",
-    dataIndex: "name",
-    scopedSlots: { customRender: "name" },
+    title: "Tanggal",
+    dataIndex: "date",
+    scopedSlots: { customRender: "date" },
   },
   {
-    title: "Ingredient",
-    dataIndex: "menu_ingredient",
-    scopedSlots: { customRender: "menu_ingredient" },
-    width: 300,
+    title: "Detail",
+    dataIndex: "transaction_detail",
+    scopedSlots: { customRender: "detail" },
   },
   {
     title: "",
@@ -118,10 +116,9 @@ export default {
   },
   data() {
     return {
-
       // Associating "Authors" table columns with its corresponding property.
       table1Columns: table1Columns,
-      menu: null,
+      transaction: null,
       cabang: null,
       visible: false,
       name: "",
@@ -131,48 +128,94 @@ export default {
     };
   },
   async mounted() {
-    this.getMenu();
+    this.gettransaction();
   },
   methods: {
+    formatDate(dateStr) {
+      console.error("dateStr", dateStr);
+      const date = new Date(dateStr);
 
-    addMenu(){
-      this.$router.push(`/menu/add`);
+      const dayList = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+      ];
+      const day = dayList[date.getDay()];
+
+      const monthList = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ];
+      const month = monthList[date.getMonth()];
+
+      const dayOfMonth = date.getDate();
+
+      const year = date.getFullYear();
+
+      const hour = date.getHours();
+      const minute = date.getMinutes();
+
+      const formattedDate = `${day}, ${dayOfMonth} ${month} ${year} Pukul ${hour}.${minute}`;
+
+      console.log(formattedDate);
+
+      return formattedDate;
+    },
+
+    addMenu() {
+      this.$router.push(`/transaction/add`);
     },
     onSearch(value) {
       console.error(value);
       if (value) {
-        this.menu = this.menu.filter((item) =>
+        this.transaction = this.transaction.filter((item) =>
           item.name.toLowerCase().includes(value.toLowerCase())
         );
-        console.error("filtered", this.menu);
+        console.error("filtered", this.transaction);
       } else {
-        this.getMenu();
+        this.gettransaction();
       }
     },
 
-    async getMenu() {
+    async gettransaction() {
       this.cabang = JSON.parse(localStorage.getItem("cabang"));
 
       const { data, error } = await supabase
-        .from("menu")
-        .select( `
+        .from("transaction")
+        .select(
+          `
             id,
-            name,
-            id_cabang,
-            menu_ingredient(
+            date,
+            total_amount,
+            transaction_detail(
               id,
               menu_id,
-              ingredient(id,name,unit),
-              quantity
+              quantity,
+              menu(id,name)
             )
-          `)
+          `
+        )
         .eq("id_cabang", this.cabang.id);
 
       if (error) {
-        console.log("Error get Ingridient", error);
+        console.log("Error get transaction", error);
       } else if (data && data.length > 0) {
-        this.menu = data; // assuming only one employee is returned
-        console.error("inventory", this.menu);
+        this.transaction = data;
+        console.error("transaction", this.transaction);
       } else {
         console.log("No matching cabang found");
       }
@@ -180,7 +223,7 @@ export default {
 
     editItem(id) {
       console.error("id", id);
-      this.$router.push(`/menu/edit/${id}`);
+      this.$router.push(`/transaction/edit/${id}`);
     },
 
     showModal() {
@@ -209,7 +252,7 @@ export default {
           ),
         });
       }
-      this.getMenu();
+      this.gettransaction();
       this.visible = false;
     },
 
@@ -218,7 +261,7 @@ export default {
     },
     async handleDelete(id) {
       if (window.confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-        const { error } = await supabase.from("menu").delete().eq("id", id);
+        const { error } = await supabase.from("transaction").delete().eq("id", id);
         if (error) {
           console.error("err delete barang", error);
         } else {
@@ -232,7 +275,7 @@ export default {
               </div>
             ),
           });
-          this.getMenu();
+          this.gettransaction();
         }
       }
     },

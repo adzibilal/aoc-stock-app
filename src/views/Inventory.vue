@@ -58,6 +58,7 @@
                 </a-modal>
               </a-col>
             </a-row>
+            <p v-if="isLoading">Loading ....</p>
           </template>
           <a-table
             :columns="table1Columns"
@@ -147,6 +148,7 @@ export default {
       quantity: "",
       unit: "",
       confDelete: false,
+      isLoading: true,
     };
   },
   async mounted() {
@@ -166,6 +168,7 @@ export default {
     },
 
     async getInventory() {
+      this.isLoading = true;
       this.cabang = JSON.parse(localStorage.getItem("cabang"));
 
       const { data, error } = await supabase
@@ -178,6 +181,7 @@ export default {
       } else if (data && data.length > 0) {
         this.inventory = data; // assuming only one employee is returned
         console.error("inventory", this.inventory);
+        this.isLoading = false;
       } else {
         console.log("No matching cabang found");
       }

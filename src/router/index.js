@@ -73,6 +73,24 @@ let routes = [
     component: () => import("../views/MenuEdit.vue"),
   },
   {
+    path: "/transaction",
+    name: "Transactions",
+    layout: "dashboard",
+    component: () => import("../views/Transaction.vue"),
+  },
+  {
+    path: "/transaction/add",
+    name: "Tambah Transaction",
+    layout: "dashboard",
+    component: () => import("../views/TransactionAdd.vue"),
+  },
+  {
+    path: "/transaction/edit/:id",
+    name: "Edit Transaction",
+    layout: "dashboard",
+    component: () => import("../views/TransactionEdit.vue"),
+  },
+  {
     path: "/billing",
     name: "Billing",
     layout: "dashboard",
